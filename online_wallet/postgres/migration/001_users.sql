@@ -1,0 +1,8 @@
+CREATE TABLE users (
+	id BIGSERIAL PRIMARY KEY,
+	name VARCHAR(18) NOT NULL,
+	email TEXT UNIQUE,
+	created_at DATE NOT NULL,
+	updated_at DATE NOT NULL,
+	balance NUMERIC(6, 2) NOT NULL,
+)
