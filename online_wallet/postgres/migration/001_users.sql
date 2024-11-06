@@ -4,5 +4,5 @@ CREATE TABLE users (
 	email TEXT UNIQUE,
 	created_at DATE NOT NULL,
 	updated_at DATE NOT NULL,
-	balance NUMERIC(6, 2) NOT NULL,
-)
+	balance DECIMAL(32, 2) NOT NULL,
+);

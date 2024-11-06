@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"sync"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -73,25 +72,24 @@ func addParams(url string) func(string) string {
 }
 
 func connectToDB(url string) (*PG, error) {
+	var err error
 	pgOnce.Do(func() {
-
 		config := PgxPoolConfig(url)
-		connPool, err := pgxpool.NewWithConfig(context.Background(), config)
+		connPool, err := pgxpool.NewWithConfig(context.TODO(), config)
 		if err != nil {
-			log.Fatal("Can't connect to database:", err)
+			err = fmt.Errorf("Can't connect to database: %v", err)
 		}
 
-		connection, err := connPool.Acquire(context.Background())
+		connection, err := connPool.Acquire(context.TODO())
 		if err != nil {
-			log.Fatal("Error acquiring connnection to the database pool: ", err)
+			err = fmt.Errorf("Error acquiring connnection to the database pool: %v", err)
 		}
 
-		err = connection.Ping(context.Background())
+		err = connection.Ping(context.TODO())
 		if err != nil {
-			log.Fatal("Couldn't ping database")
+			err = fmt.Errorf("Couldn't ping database: %v", err)
 		}
 		pgInstance = &PG{DB: connPool}
 	})
-
-	return pgInstance, nil
+	return pgInstance, err
 }
