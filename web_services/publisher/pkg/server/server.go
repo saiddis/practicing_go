@@ -9,7 +9,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/cors"
 	"github.com/nats-io/nats.go"
-	"github.com/saiddis/practicing_go/web_services/service1/internal"
+	"github.com/saiddis/practicing_go/web_services/publisher/internal"
 )
 
 type Server struct {

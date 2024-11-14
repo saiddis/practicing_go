@@ -1,4 +1,4 @@
-module github.com/saiddis/practicing_go/web_services/service2
+module github.com/saiddis/practicing_go/web_services/subscriber
 
 go 1.23.0
 

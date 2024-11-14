@@ -1,8 +1,8 @@
-module github.com/saiddis/practicing_go/web_services/service1
+module github.com/saiddis/practicing_go/web_services/publisher
 
 go 1.23.0
 
-replace github.com/saiddis/practicing_go/web_services/service1/pkg/server => ./pkg/server
+replace github.com/saiddis/practicing_go/web_services/publisher/pkg/server => ./pkg/server
 
 require (
 	github.com/go-chi/chi v1.5.5

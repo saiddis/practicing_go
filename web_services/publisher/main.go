@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/saiddis/practicing_go/web_services/service1/pkg/server"
+	"github.com/saiddis/practicing_go/web_services/publisher/pkg/server"
 	"log"
 )
 
