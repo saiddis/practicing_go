@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.23 AS builder
+FROM golang:1.23
 
 RUN apt update && apt upgrade -y &&\
 	apt install -y git\

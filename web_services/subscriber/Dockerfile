@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.23 AS builder
+FROM golang:1.23
 
 RUN apt update && apt upgrade -y &&\
 	apt install -y git\
@@ -11,7 +11,9 @@ WORKDIR /go/src/app
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY *.go ./
+COPY . .
+
+RUN go mod tidy
 
 RUN go build -o /main
 
