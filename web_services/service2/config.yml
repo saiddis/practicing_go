@@ -1,0 +1,3 @@
+redis_host: localhost
+redis_port: 6379
+nats_addr: nats://nats:4222
