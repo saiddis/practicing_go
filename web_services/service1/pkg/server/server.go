@@ -30,7 +30,7 @@ func New(addr string, opts ...Option) (*Server, error) {
 		}
 	}
 	server := &http.Server{
-		Addr: ":" + strconv.Itoa(options.port),
+		Addr: addr + ":" + strconv.Itoa(options.port),
 	}
 	nc, err := nats.Connect(options.natsAddr)
 	if err != nil {
@@ -52,7 +52,7 @@ func (s *Server) Run() error {
 		MaxAge:           300,
 	}))
 
-	router.Post("/greet", s.apiConfig.Greet)
+	router.Post("/chat", s.apiConfig.Chat)
 
 	s.engine.Handler = router
 

@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"time"
 
 	"github.com/nats-io/nats.go"
+	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
@@ -21,56 +23,42 @@ func main() {
 		sugarLogger.Fatalf("error reading config file: %v", err)
 	}
 
-	nc, _ := nats.Connect(viper.GetString("nats_addr"))
-	defer nc.Drain()
-	_, err = nc.Subscribe("greet.*", func(msg *nats.Msg) {
-		//name := msg.Subject[6:]
-		msg.Respond([]byte(msg.Subject))
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     viper.GetString("redis_host") + ":" + viper.GetString("redis_port"),
+		Password: "",
+		DB:       0,
 	})
+
+	nc, err := nats.Connect(viper.GetString("nats_addr"))
+	if err != nil {
+		sugarLogger.Fatalf("error connecting to NATS server: %v", err)
+	}
+	defer nc.Drain()
+
+	var name string
+	var greet string
+	ctx := context.Background()
+	_, err = nc.Subscribe("chat.*", func(msg *nats.Msg) {
+		name = msg.Subject[5:]
+		greet = string(msg.Data)
+		msg.Respond([]byte(msg.Subject))
+
+		err = rdb.Set(ctx, name, greet, 1*time.Minute).Err()
+		if err != nil {
+			sugarLogger.Errorf("error setting values to redis: %v", err)
+			return
+		}
+		val, err := rdb.Get(ctx, name).Result()
+		if err != nil {
+			sugarLogger.Errorf("error getting values from redis: %v", err)
+			return
+		}
+		sugarLogger.Infof("%s: %s", name, val)
+	})
+
 	if err != nil {
 		sugarLogger.Fatalf("error subscribing to subject: %v", err)
 	}
 
 	select {}
-	//PublishSubscribe(nc, sugarLogger)
-
-	//rdb := redis.NewClient(&redis.Options{
-	//	Addr: viper.GetString("REDIS_HOST") + ":" + viper.GetString("REDIS_PORT"),
-	//})
-
-}
-
-func PublishSubscribe(nc *nats.Conn, logger *zap.SugaredLogger) {
-	defer nc.Drain()
-	sub, _ := nc.Subscribe("greet.*", func(msg *nats.Msg) {
-		name := msg.Subject[6:]
-		msg.Respond([]byte("hello, " + name))
-	})
-
-	rep, err := nc.Request("greet.joe", nil, time.Second)
-	if err != nil {
-		logger.Logf(1, "error making request: %v", err)
-	}
-	logger.Logf(1, "Recieved reply: %v", string(rep.Data))
-
-	rep, err = nc.Request("greet.sue", nil, time.Second)
-	if err != nil {
-		logger.Logf(1, "error making request: %v", err)
-	}
-	logger.Logf(1, "Recieved reply: %s", string(rep.Data))
-
-	rep, err = nc.Request("greet.bob", nil, time.Second)
-	if err != nil {
-		logger.Logf(1, "error making request: %v", err)
-	}
-	logger.Logf(1, "Recieved reply: %s", string(rep.Data))
-
-	sub.Unsubscribe()
-
-	_, err = nc.Request("greet.joe", nil, time.Second)
-	if err != nil {
-		logger.Logf(1, "error making request: %v", err)
-	}
-	logger.Logf(1, "error requesting service2: %v", err)
-
 }
